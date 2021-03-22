@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -exo pipefail
 
-if git status; then
-    echo "Dirty working directory"
+if ! git diff-index --quiet HEAD --; then
+    echo Dirty git
     exit 1
 fi
 
@@ -18,3 +18,7 @@ echo @@@@@@@@@@@@@@@@@@@@@@@
 echo @@@@@@@@@@@@@@@@@@@@@@@
 set -x
 twine check dist/*
+
+if [[ $1 != --production ]]; then
+    twine upload --repository-url https://test.pypi.org/legacy/ dist/* $@
+fi 
