@@ -14,6 +14,9 @@ foo.tar
        - foo3.tar.gz
             - foo4
             - foo5
+       - foo6.tar.gz
+            - foo7
+            - foo8
     - abc/
        - def
        - ghi
@@ -27,6 +30,13 @@ nestedarchive.get("/tmp/foobar/foo.tar/abc/def")
 nestedarchive.get("/tmp/foobar/foo.tar/bar.tar/bar1")
 nestedarchive.get("/tmp/foobar/foo.tar/bar.tar/foo3.tar.gz/foo4")
 ```
+
+Globs are also supported - all matches are tried until one is found that (eventually) contains the expected file, e.g.:
+```
+- nestedarchive.get("/tmp/foobar/foo.tar/bar.tar/foo*.tar.gz/foo7")
+```
+Will first silently try `foo3.tar.gz` and fail because it does not contain `foo7`, then it will try `foo6.tar.gz` and
+succeed because `foo6.tar.gz` contains `foo7`
 
 Currently supported extensions:
 - tar

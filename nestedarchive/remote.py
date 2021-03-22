@@ -16,8 +16,8 @@ class RemoteNestedArchive:
     the downloaded archive.
 
     Example usage:
-        >> archive = nestedarchive.RemoteNestedArchive("https://example.com/downloads/some.tar")
-        >> contents = archive.get("/tmp/foobar/foo.tar/bar.tar/foo3.tar.gz/foo4")
+    >>> archive = nestedarchive.RemoteNestedArchive("https://example.com/downloads/some.tar")
+    >>> contents = archive.get("/tmp/foobar/foo.tar/bar.tar/foo3.tar.gz/foo4")
 
     Note that this class creates a temporary directory to store the archive, and
     that temporary directory along with anything in it automatically gets deleted
