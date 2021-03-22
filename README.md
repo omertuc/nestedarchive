@@ -1,7 +1,7 @@
 Allows simplified access to files in nested archives.
 
 # Example
-For example, given an archive placed in `/tmp/foobar/foo.tar` with this structure:
+Given an archive placed in `/tmp/foobar/foo.tar` with this structure:
 ```
 foo.tar
     - foo1
@@ -17,7 +17,7 @@ foo.tar
        - ghi
 ```
 
-This function will allow reading the contents of the files in this nested archive in
+This library will allow reading the contents of the files in this nested archive in
 the following "seamless" manner:
 ```
 nestedarchive.get("/tmp/foobar/foo.tar/foo1")
