@@ -1,3 +1,5 @@
+<a href="https://pypi.org/project/nestedarchive/"><img alt="PyPI" src="https://img.shields.io/pypi/v/nestedarchive"></a>
+
 Allows simplified access to files in nested archives.
 
 # Example
