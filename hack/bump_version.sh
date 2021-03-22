@@ -2,8 +2,7 @@
 
 set -eo pipefail
 
-if [ -z "$1" ]
-  then
+if [[ -z "$1" ]]; then
     echo "
 Bumps the version where needed.
 
@@ -12,8 +11,11 @@ you wish to bump other components.
 
 Requires the bumpversion command (python3 -m pip install bumpversion)
 
-USAGE: $0 current_version"
+USAGE: $0 current_version new_version"
 exit 1
 fi
 
-bumpversion --current-version $1 patch setup.py /__init__.py $@
+current_version=$1
+shift
+
+bumpversion --current-version $current_version patch setup.py nestedarchive/__init__.py $@
