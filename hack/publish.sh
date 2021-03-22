@@ -40,5 +40,5 @@ shift
 if [[ $deploy_env != --production ]]; then
     twine upload --repository-url https://test.pypi.org/legacy/ dist/* --verbose $@
 else
-    twine upload --repository-url dist/* --verbose $@
+    twine upload dist/* --verbose $@
 fi 
