@@ -6,8 +6,8 @@ if [[ -z "$1" ]]; then
 echo "
 Bumps the version where needed.
 
-Modifies the patch component by default, manually change this script to minor/major if
-you wish to bump other components.
+Modifies the patch component by default, if you wish to bump other components,
+manually run the command in this script with minor/major
 
 Requires the bumpversion command (python3 -m pip install bumpversion)
 
