@@ -3,7 +3,7 @@
 set -eo pipefail
 
 if [[ -z "$1" ]]; then
-    echo "
+echo "
 Bumps the version where needed.
 
 Modifies the patch component by default, manually change this script to minor/major if

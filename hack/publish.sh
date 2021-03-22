@@ -1,19 +1,19 @@
 #!/bin/bash
 
-set -exo pipefail
-
 if [[ -z "$1" ]]; then
     echo "
-Publish to pypi
+Publish to pypi. Pass --production to upload to actual pypi
 
 Don't forget to bump the version!
 
 Requires twine and wheel:
 python3 -m pip install twine wheel
 
-USAGE: $0 current_version new_version"
+USAGE: $0 [--production|--test]"
 exit 1
 fi
+
+set -exo pipefail
 
 if ! git diff-index --quiet HEAD --; then
     echo Dirty git
@@ -38,7 +38,7 @@ deploy_env=$1
 shift
 
 if [[ $deploy_env != --production ]]; then
-    twine upload --repository-url https://test.pypi.org/legacy/ dist/* $@
+    twine upload --repository-url https://test.pypi.org/legacy/ dist/* --verbose $@
 else
-    twine upload --repository-url dist/* $@
+    twine upload --repository-url dist/* --verbose $@
 fi 
