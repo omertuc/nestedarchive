@@ -7,6 +7,9 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
+rm -rf dist/*
+rm -rf build/*
+
 python3 -m pip install twine wheel
 python3 setup.py sdist bdist_wheel
 
