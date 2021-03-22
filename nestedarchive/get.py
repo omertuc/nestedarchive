@@ -60,10 +60,12 @@ def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path
             # try to extract it an then recurse into that extracted directory
 
             extracted = cwd / _nestedarchive_extracted_tar_name(candidate.name)
-            try:
-                tarfile.open(candidate).extractall(path=extracted)
-            except tarfile.ReadError as e:
-                raise ValueError(f"Python's tarfile module failed to open {candidate}, file type unsupported") from e
+
+            if not extracted.exists():
+                try:
+                    tarfile.open(candidate).extractall(path=extracted)
+                except tarfile.ReadError as e:
+                    raise ValueError(f"Python's tarfile module failed to open {candidate}, file type unsupported") from e
 
             return _get_recurse(nested_archive_path=Path(*rest_of_segments),
                                 cwd=extracted, mode=mode, original=original)
