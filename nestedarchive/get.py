@@ -46,6 +46,8 @@ def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path
                 return f.read()
         except FileNotFoundError as e:
             raise FileNotFoundError("File not found - this shouldn't happen, expected to fail earlier") from e
+        except UnicodeDecodeError as e:
+            raise RuntimeError("""Looks like you're trying to get a non utf-8 encoded file, try using the mode="rb" kwarg for the get method""") from e
 
     # Support globs - see README for more information
     exceptions = []
