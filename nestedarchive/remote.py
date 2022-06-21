@@ -23,11 +23,14 @@ class RemoteNestedArchive:
     that temporary directory along with anything in it automatically gets deleted
     once the class instance is destructed.
     """
-    def __init__(self, root_archive_url: str, delete=True):
+    def __init__(self, root_archive_url: str, delete=True, init_download=False):
         self.root_archive_url = root_archive_url
         self.tmpdir = Path(tempfile.mkdtemp())
         self.downloaded = False
         self.delete = delete
+
+        if init_download:
+            self._download_if_needed()
 
     @property
     def root_tar_file_path(self) -> Path:
