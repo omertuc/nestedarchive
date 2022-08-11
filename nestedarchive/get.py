@@ -12,7 +12,7 @@ def get(nested_archive_path: Union[str, Path], mode="r"):
     return _get_recurse(nested_archive_path, cwd=Path.cwd(), mode=mode, original=nested_archive_path)
 
 
-def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path):
+def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path) -> Union[Path, Union[str, bytes]]:
     """
     Recursively strips path components from left to right, each time
     updating cwd to point to the current directory.
@@ -24,6 +24,9 @@ def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path
 
     This is done until the final path component is encountered, in that case,
     the file contents are read (using mode as the mode) and returned.
+
+    If the final path component is a directory, the path of the directory is
+    returned.
     """
     root_segment, *rest_of_segments = nested_archive_path.parts
 
@@ -32,7 +35,7 @@ def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path
     # We reached the end of the path
     if len(rest_of_segments) == 0:
         if current.is_dir():
-            raise ValueError("The final segment cannot be a directory")
+            return current
 
         try:
             current = next(current.parent.glob(current.name))
