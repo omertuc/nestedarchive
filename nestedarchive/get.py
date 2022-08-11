@@ -70,7 +70,9 @@ def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path
                 try:
                     tarfile.open(candidate).extractall(path=extracted)
                 except tarfile.ReadError as e:
-                    raise ValueError(f"Python's tarfile module failed to open {candidate}, file type unsupported") from e
+                    ex = ValueError(f"Python's tarfile module failed to open {candidate}, file type unsupported")
+                    ex.__cause__ = e
+                    exceptions.append(e)
 
             return _get_recurse(nested_archive_path=Path(*rest_of_segments),
                                 cwd=extracted, mode=mode, original=original)
