@@ -25,6 +25,8 @@ foo.tar
 This library will allow reading the contents of the files in this nested archive in
 the following "seamless" manner:
 ```
+import nestedarchive
+
 nestedarchive.get("/tmp/foobar/foo.tar/foo1")
 nestedarchive.get("/tmp/foobar/foo.tar/abc/def")
 nestedarchive.get("/tmp/foobar/foo.tar/bar.tar/bar1")
@@ -37,6 +39,14 @@ Globs are also supported - all matches are tried until one is found that (eventu
 ```
 Will first silently try `foo3.tar.gz` and fail because it does not contain `foo7`, then it will try `foo6.tar.gz` and
 succeed because `foo6.tar.gz` contains `foo7`
+
+If you want to get all files matching a glob, use `get_all` instead.
+
+You can also access a URL instead of a local file path:
+```
+archive = nestedarchive.RemoteNestedArchive("https://example.com/archive.tar")
+content = archive.get("/nested/path/file.txt")
+```
 
 Currently supported extensions:
 - tar
