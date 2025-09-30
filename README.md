@@ -3,7 +3,9 @@
 Allows simplified access to files in nested archives.
 
 # Example
+
 Given an archive placed in `/tmp/foobar/foo.tar` with this structure:
+
 ```
 foo.tar
     - foo1
@@ -22,8 +24,9 @@ foo.tar
        - ghi
 ```
 
-This library will allow reading the contents of the files in this nested archive in
-the following "seamless" manner:
+This library will allow reading the contents of the files in this nested
+archive in the following "seamless" manner:
+
 ```
 import nestedarchive
 
@@ -33,14 +36,19 @@ nestedarchive.get("/tmp/foobar/foo.tar/bar.tar/bar1")
 nestedarchive.get("/tmp/foobar/foo.tar/bar.tar/foo3.tar.gz/foo4")
 ```
 
-Globs are also supported - all matches are tried until one is found that (eventually) contains the expected file, e.g.:
+Globs are also supported - all matches are tried until one is found that
+(eventually) contains the expected file, e.g.:
+
 ```
 - nestedarchive.get("/tmp/foobar/foo.tar/bar.tar/foo*.tar.gz/foo7")
 ```
-Will first silently try `foo3.tar.gz` and fail because it does not contain `foo7`, then it will try `foo6.tar.gz` and
-succeed because `foo6.tar.gz` contains `foo7`
 
-If you want to get all files matching a glob, use `get_all` instead.
+Will first silently try `foo3.tar.gz` and fail because it does not contain
+`foo7`, then it will try `foo6.tar.gz` and succeed because `foo6.tar.gz`
+contains `foo7`
+
+If you want to get all files matching a glob, use `get_all` instead. get_all
+does not support a mode parameter, it always returns binary file data.
 
 You can also access a URL instead of a local file path:
 ```

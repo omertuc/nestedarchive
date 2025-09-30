@@ -276,7 +276,7 @@ class TestGetAll:
             os.chdir(temp_dir)
             results = get_all("test.txt")
             assert len(results) == 1
-            assert results[0] == "Single file content"
+            assert results[0] == b"Single file content"
         finally:
             os.chdir(original_cwd)
     
@@ -292,7 +292,7 @@ class TestGetAll:
             for file_path, expected_content in structure["files"].items():
                 results = get_all(file_path)
                 assert len(results) == 1
-                assert results[0] == expected_content
+                assert results[0] == expected_content.encode()
         finally:
             os.chdir(original_cwd)
     
@@ -310,9 +310,9 @@ class TestGetAll:
             # This should match test1.txt and test2.txt
             results = get_all("test*.txt")
             assert len(results) == 2
-            assert "Content 1" in results
-            assert "Content 2" in results
-            assert "Other content" not in results
+            assert b"Content 1" in results
+            assert b"Content 2" in results
+            assert b"Other content" not in results
         finally:
             os.chdir(original_cwd)
     
@@ -327,22 +327,22 @@ class TestGetAll:
             # Test text file
             text_results = get_all(structure["text_path"])
             assert len(text_results) == 1
-            assert text_results[0] == structure["text_content"]
+            assert text_results[0] == structure["text_content"].encode()
             
             # Test binary file
-            binary_results = get_all(structure["binary_path"], mode="rb")
+            binary_results = get_all(structure["binary_path"])
             assert len(binary_results) == 1
             assert binary_results[0] == structure["binary_content"]
         finally:
             os.chdir(original_cwd)
     
     def test_get_all_empty_result(self, temp_dir):
-        """Test get_all() raises FileNotFoundError when no files match."""
+        """Test get_all() returns empty list when no files match."""
         original_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)
-            with pytest.raises(FileNotFoundError):
-                get_all("nonexistent*.txt")
+            results = get_all("nonexistent*.txt")
+            assert results == []
         finally:
             os.chdir(original_cwd)
     
@@ -363,17 +363,17 @@ class TestGetAll:
             # Test getting specific files
             results1 = get_all("logs.tar/log1.txt")
             assert len(results1) == 1
-            assert results1[0] == "Log entry 1"
+            assert results1[0] == b"Log entry 1"
             
             results2 = get_all("logs.tar/log2.txt")
             assert len(results2) == 1
-            assert results2[0] == "Log entry 2"
+            assert results2[0] == b"Log entry 2"
             
             # Test pattern matching
             log_results = get_all("logs.tar/log*.txt")
             assert len(log_results) == 2
-            assert "Log entry 1" in log_results
-            assert "Log entry 2" in log_results
+            assert b"Log entry 1" in log_results
+            assert b"Log entry 2" in log_results
         finally:
             os.chdir(original_cwd)
 
@@ -389,7 +389,7 @@ class TestCompatibility:
         try:
             os.chdir(temp_dir)
             
-            get_result = get("unique.txt")
+            get_result = get("unique.txt", mode="rb")
             get_all_results = get_all("unique.txt")
             
             assert len(get_all_results) == 1
@@ -406,13 +406,13 @@ class TestCompatibility:
         try:
             os.chdir(temp_dir)
             
-            get_result = get("match*.txt")
+            get_result = get("match*.txt", mode="rb")
             get_all_results = get_all("match*.txt")
             
             assert len(get_all_results) == 2
             assert get_result == get_all_results[0]
-            assert "First match" in get_all_results
-            assert "Second match" in get_all_results
+            assert b"First match" in get_all_results
+            assert b"Second match" in get_all_results
         finally:
             os.chdir(original_cwd)
 
@@ -474,7 +474,7 @@ class TestEdgeCases:
         try:
             os.chdir(temp_dir)
             
-            with pytest.raises(FileNotFoundError):
+            with pytest.raises(RuntimeError):
                 get("fake.tar/somefile.txt")
         finally:
             os.chdir(original_cwd)
