@@ -9,10 +9,15 @@ def get(nested_archive_path: Union[str, Path], mode="r"):
     See README.md for examples and documentations for this function
     """
     nested_archive_path = Path(nested_archive_path)
-    return _get_recurse(nested_archive_path, cwd=Path.cwd(), mode=mode, original=nested_archive_path)
+    return next(_get_recurse(nested_archive_path, cwd=Path.cwd(), mode=mode, original=nested_archive_path))
 
 
-def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path) -> Union[Path, Union[str, bytes]]:
+def get_all(nested_archive_path: Union[str, Path], mode="r"):
+    nested_archive_path = Path(nested_archive_path)
+    return list(_get_recurse(nested_archive_path, cwd=Path.cwd(), mode=mode, original=nested_archive_path))
+
+
+def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path):
     """
     Recursively strips path components from left to right, each time
     updating cwd to point to the current directory.
@@ -35,22 +40,24 @@ def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path
     # We reached the end of the path
     if len(rest_of_segments) == 0:
         if current.is_dir():
-            return current
+            yield current
+            return
 
-        try:
-            current = next(current.parent.glob(current.name))
-        except StopIteration:
+        matches = list(current.parent.glob(current.name))
+        if not matches:
             other_files = os.linesep.join(map(lambda path: path.name, current.parent.iterdir()))
             raise FileNotFoundError(
                 f"Couldn't find a file matching {current}, but I found these other files:{os.linesep}{other_files}")
 
-        try:
-            with open(current, mode) as f:
-                return f.read()
-        except FileNotFoundError as e:
-            raise FileNotFoundError("File not found - this shouldn't happen, expected to fail earlier") from e
-        except UnicodeDecodeError as e:
-            raise RuntimeError("""Looks like you're trying to get a non utf-8 encoded file, try using the mode="rb" kwarg for the get method""") from e
+        for match in matches:
+            try:
+                with open(match, mode) as f:
+                    yield f.read()
+            except FileNotFoundError as e:
+                raise FileNotFoundError("File not found - this shouldn't happen, expected to fail earlier") from e
+            except UnicodeDecodeError as e:
+                raise RuntimeError("""Looks like you're trying to get a non utf-8 encoded file, try using the mode="rb" kwarg for the get method""") from e
+        return
 
     # Support globs - see README for more information
     exceptions = []
@@ -58,24 +65,25 @@ def _get_recurse(nested_archive_path: Path, cwd: Path, mode: str, original: Path
         try:
             if candidate.is_dir():
                 # Simply recurse into regular directories, no unarchiving needed
-                return _get_recurse(Path(*rest_of_segments),
-                                    cwd=candidate, mode=mode, original=original)
+                yield from _get_recurse(Path(*rest_of_segments),
+                                        cwd=candidate, mode=mode, original=original)
+            else:
+                # If we reached this point, it means the user tried to "recurse" into an archive -
+                # try to extract it an then recurse into that extracted directory
 
-            # If we reached this point, it means the user tried to "recurse" into an archive -
-            # try to extract it an then recurse into that extracted directory
+                extracted = cwd / _nestedarchive_extracted_tar_name(candidate.name)
 
-            extracted = cwd / _nestedarchive_extracted_tar_name(candidate.name)
+                if not extracted.exists():
+                    try:
+                        tarfile.open(candidate).extractall(path=extracted)
+                    except tarfile.ReadError as e:
+                        ex = ValueError(f"Python's tarfile module failed to open {candidate}, file type unsupported")
+                        ex.__cause__ = e
+                        exceptions.append(e)
+                        continue
 
-            if not extracted.exists():
-                try:
-                    tarfile.open(candidate).extractall(path=extracted)
-                except tarfile.ReadError as e:
-                    ex = ValueError(f"Python's tarfile module failed to open {candidate}, file type unsupported")
-                    ex.__cause__ = e
-                    exceptions.append(e)
-
-            return _get_recurse(nested_archive_path=Path(*rest_of_segments),
-                                cwd=extracted, mode=mode, original=original)
+                yield from _get_recurse(nested_archive_path=Path(*rest_of_segments),
+                                        cwd=extracted, mode=mode, original=original)
         except FileNotFoundError as e:
             exceptions.append(e)
     else:
